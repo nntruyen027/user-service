@@ -2,18 +2,17 @@ package qbit.entier.user_service.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
-import java.util.function.Function;
+import qbit.entier.user_service.config.JwtAuthentication;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+import java.util.Date;
+import java.util.function.Function;
 
 @Component
 public class JwtUtil {
@@ -62,5 +61,16 @@ public class JwtUtil {
 
     public boolean validateToken(String token, String username) {
         return (extractUsername(token).equals(username) && !isTokenExpired(token));
+    }
+
+    public String getJwtFromContext() {
+        // Lấy Authentication từ SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Kiểm tra nếu Authentication là một đối tượng JwtAuthentication
+        if (authentication instanceof JwtAuthentication jwtAuthentication) {
+            return jwtAuthentication.getJwt(); // Trả về JWT đã lưu trong JwtAuthentication
+        }
+        return null; // Nếu không tìm thấy JWT trong context
     }
 }

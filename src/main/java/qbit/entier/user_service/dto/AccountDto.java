@@ -12,14 +12,14 @@ import java.util.Set;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AuthDto {
+public class AccountDto {
     private Long id;
     private String username;
-    private String password;
     private String email;
     private String googleId;
     private String facebookId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<RoleDto> roles;
+
 }
