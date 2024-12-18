@@ -35,6 +35,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<Optional<UserAccountDto>> getById(@PathVariable Long id) {
         if (userService.getUserById(id).isPresent())
@@ -63,6 +64,17 @@ public class UserController {
     public ResponseEntity<?> updateOne(@PathVariable Long id, @RequestBody User user) {
         try {
             return ResponseEntity.ok(userService.updateUser(id, user));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        }
+    }
+
+    @PutMapping("/self")
+    public ResponseEntity<?> updateSelf(@RequestBody User user) {
+        try {
+            return ResponseEntity.ok(userService.updateSelf(user));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         } catch (IllegalStateException ex) {
