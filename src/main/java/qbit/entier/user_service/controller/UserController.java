@@ -16,7 +16,7 @@ import qbit.entier.user_service.service.UserService;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("")
 public class UserController {
     @Autowired
     private UserService userService;

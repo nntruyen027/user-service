@@ -9,7 +9,7 @@ import qbit.entier.user_service.entity.Address;
 import qbit.entier.user_service.service.AddressService;
 
 @RestController
-@RequestMapping("/users/addresses")
+@RequestMapping("/addresses")
 public class AddressController {
     @Autowired
     private AddressService addressService;
@@ -51,7 +51,7 @@ public class AddressController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> updateAddress(@PathVariable Long id) {
+    public ResponseEntity<?> deleteAddress(@PathVariable Long id) {
         try {
             addressService.deleteSelfAddress(id);
             return ResponseEntity.noContent().build();
