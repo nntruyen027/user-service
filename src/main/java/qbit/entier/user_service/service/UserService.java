@@ -85,8 +85,29 @@ public class UserService {
         return userRepository.findUserByAccountId(auth.getId());
     }
 
-    public UserAccountDto createOne(User user) {
+    public UserAccountDto createSelf(User user) {
         ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserByJwt("Bearer " + jwtUtil.getJwtFromContext());
+
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            throw new EntityNotFoundException("Failed to retrieve account information from auth service");
+        }
+
+        AccountDto account = Optional.ofNullable(responseEntity.getBody())
+                .orElseThrow(() -> new EntityNotFoundException("Account information is null"));
+
+        if (userRepository.existsByAccountId(account.getId())) {
+            throw new IllegalStateException("User with the account ID already exists");
+        }
+
+        user.setAccountId(account.getId());
+        user.setEmail(account.getEmail());
+        User savedUser = userRepository.save(user);
+
+        return UserAccountDto.fromEntity(savedUser, account);
+    }
+
+    public UserAccountDto createOne(User user) {
+        ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById("Bearer " + jwtUtil.getJwtFromContext(), user.getAccountId());
 
         if (!responseEntity.getStatusCode().is2xxSuccessful()) {
             throw new EntityNotFoundException("Failed to retrieve account information from auth service");

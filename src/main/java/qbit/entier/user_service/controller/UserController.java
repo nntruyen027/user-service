@@ -44,6 +44,17 @@ public class UserController {
             return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/self")
+    public ResponseEntity<?> createSelf(@RequestBody User user) {
+        try {
+            return ResponseEntity.ok(userService.createSelf(user));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createOne(@RequestBody User user) {
         try {
@@ -54,6 +65,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
         }
     }
+
+
 
     @PutMapping("/avatar")
     public ResponseEntity<UserAccountDto> saveAvatar(@RequestParam("file") MultipartFile file) throws Exception {
