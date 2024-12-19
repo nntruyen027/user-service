@@ -172,6 +172,20 @@ public class UserService {
             existingUser.setPhone(updatedUser.getPhone());
         if (updatedUser.getIsMale() != null)
             existingUser.setIsMale(updatedUser.getIsMale());
+        if(updatedUser.getAccountId() != null) {
+            ResponseEntity<AccountDto> responseEntity1 = authServiceClient
+                    .getUserById("Bearer " + jwtUtil.getJwtFromContext(),
+                            updatedUser.getAccountId());
+
+            if (!responseEntity1.getStatusCode().is2xxSuccessful()) {
+                throw new EntityNotFoundException("Failed to retrieve account information from auth service");
+            }
+
+            AccountDto account1 = Optional.ofNullable(responseEntity.getBody())
+                    .orElseThrow(() -> new EntityNotFoundException("Account information is null"));
+
+            existingUser.setAccountId(account1.getId());
+        }
 
         User savedUser = userRepository.save(existingUser);
 
