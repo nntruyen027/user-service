@@ -11,12 +11,12 @@ import qbit.entier.user_service.dto.AccountDto;
 
 @FeignClient(name = "auth-service", url = "${auth.service.url}", configuration = FeignClientConfig.class)
 public interface AuthServiceClient {
-    @GetMapping(value = "/auth/self")
+    @GetMapping(value = "/self")
     ResponseEntity<AccountDto> getUserByJwt(@RequestHeader("Authorization") String authorizationHeader);
 
-    @GetMapping(value = "/auth/{id}")
+    @GetMapping(value = "/{id}")
     ResponseEntity<AccountDto> getUserById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long id);
 
-    @DeleteMapping(value = "/auth/{id}")
+    @DeleteMapping(value = "/{id}")
     ResponseEntity<?> deleteUserById(@RequestHeader("Authorization") String auth, @PathVariable Long id);
 }
