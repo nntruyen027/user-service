@@ -38,7 +38,8 @@ public class UserService {
 
     public Page<UserAccountDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(user -> {
-            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById(user.getAccountId());
+            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById("Bearer " + jwtUtil.getJwtFromContext(),
+                    user.getAccountId());
             AccountDto account = responseEntity.getBody();
             return UserAccountDto.fromEntity(user, account);
         });
@@ -46,7 +47,8 @@ public class UserService {
 
     public Optional<UserAccountDto> getUserById(Long id) {
         return userRepository.findById(id).map(user -> {
-            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById(user.getAccountId());
+            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById("Bearer " + jwtUtil.getJwtFromContext(),
+                    user.getAccountId());
             AccountDto account = responseEntity.getBody();
             return UserAccountDto.fromEntity(user, account);
         });
@@ -177,7 +179,7 @@ public class UserService {
             existingUser.setIsMale(updatedUser.getIsMale());
         if(updatedUser.getAccountId() != null) {
             ResponseEntity<AccountDto> responseEntity1 = authServiceClient
-                    .getUserById(updatedUser.getAccountId());
+                    .getUserById("Bearer " + jwtUtil.getJwtFromContext(), updatedUser.getAccountId());
 
             if (!responseEntity1.getStatusCode().is2xxSuccessful()) {
                 throw new EntityNotFoundException("Failed to retrieve account information from auth service");

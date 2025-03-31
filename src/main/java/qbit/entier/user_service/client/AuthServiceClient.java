@@ -13,7 +13,7 @@ public interface AuthServiceClient {
     ResponseEntity<AccountDto> getUserByJwt(@RequestHeader("Authorization") String authorizationHeader);
 
     @GetMapping(value = "/{id}")
-    ResponseEntity<AccountDto> getUserById(@PathVariable Long id);
+    ResponseEntity<AccountDto> getUserById(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Long id);
 
     @DeleteMapping(value = "/{id}")
     void deleteUserById(@RequestHeader("Authorization") String auth, @PathVariable Long id);
