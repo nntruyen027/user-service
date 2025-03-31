@@ -11,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Builder
-public class UserAccountDto {
-    private Long id;
+public class CreateUserDto {
+    private Long accountId;
 
     private String fullName;
 
@@ -24,13 +24,15 @@ public class UserAccountDto {
 
     private String avatar;
 
-    private AccountDto account;
-
     private List<AddressDto> addresses;
 
-    public static UserAccountDto fromEntity(User user) {
-        return UserAccountDto.builder()
-                .id(user.getId())
+    private String username;
+
+    private String password;
+
+    public static UserDto fromEntity(User user) {
+        return UserDto.builder()
+                .accountId(user.getAccountId())
                 .avatar(user.getAvatar())
                 .email(user.getEmail())
                 .phone(user.getPhone())
@@ -40,16 +42,15 @@ public class UserAccountDto {
                 .build();
     }
 
-    public static UserAccountDto fromEntity(User user, AccountDto account) {
-        return UserAccountDto.builder()
-                .id(user.getId())
-                .avatar(user.getAvatar())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .fullName(user.getFullName())
-                .isMale(user.getIsMale())
-                .account(account)
-                .addresses(user.getAddresses().stream().map(AddressDto::fromEntity).toList())
+    public User toEntity() {
+        return User.builder()
+                .accountId(this.getAccountId())
+                .avatar(this.getAvatar())
+                .email(this.getEmail())
+                .phone(this.getPhone())
+                .fullName(this.getFullName())
+                .isMale(this.getIsMale())
+                .addresses(this.getAddresses().stream().map(AddressDto::toEntity).toList())
                 .build();
     }
 }

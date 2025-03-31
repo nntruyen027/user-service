@@ -10,15 +10,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import qbit.entier.user_service.client.AuthServiceClient;
-import qbit.entier.user_service.dto.AccountDto;
-import qbit.entier.user_service.dto.UserAccountDto;
-import qbit.entier.user_service.dto.UserDto;
+import qbit.entier.user_service.dto.*;
+import qbit.entier.user_service.entity.Address;
 import qbit.entier.user_service.entity.User;
 import qbit.entier.user_service.repository.UserRepository;
 import qbit.entier.user_service.util.FileUtil;
 import qbit.entier.user_service.util.JwtUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ public class UserService {
 
     public Page<UserAccountDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(user -> {
-            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById("Bearer " + jwtUtil.getJwtFromContext(), user.getAccountId());
+            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById(user.getAccountId());
             AccountDto account = responseEntity.getBody();
             return UserAccountDto.fromEntity(user, account);
         });
@@ -46,7 +46,7 @@ public class UserService {
 
     public Optional<UserAccountDto> getUserById(Long id) {
         return userRepository.findById(id).map(user -> {
-            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById("Bearer " + jwtUtil.getJwtFromContext(), user.getAccountId());
+            ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById(user.getAccountId());
             AccountDto account = responseEntity.getBody();
             return UserAccountDto.fromEntity(user, account);
         });
@@ -106,8 +106,8 @@ public class UserService {
         return UserAccountDto.fromEntity(savedUser, account);
     }
 
-    public UserAccountDto createOne(User user) {
-        ResponseEntity<AccountDto> responseEntity = authServiceClient.getUserById("Bearer " + jwtUtil.getJwtFromContext(), user.getAccountId());
+    public UserAccountDto createOne(CreateUserDto userDto) {
+        ResponseEntity<AccountDto> responseEntity = authServiceClient.createUser("Bearer " + jwtUtil.getJwtFromContext(), CreateAccountDto.builder().email(userDto.getEmail()).password(userDto.getPassword()).username(userDto.getUsername()).build());
 
         if (!responseEntity.getStatusCode().is2xxSuccessful()) {
             throw new EntityNotFoundException("Failed to retrieve account information from auth service");
@@ -119,6 +119,12 @@ public class UserService {
         if (userRepository.existsByAccountId(account.getId())) {
             throw new IllegalStateException("User with the account ID already exists");
         }
+        User user = User.builder()
+                .phone(userDto.getPhone())
+                .fullName(userDto.getFullName())
+                .isMale(userDto.getIsMale())
+                .addresses(new ArrayList<Address>())
+                .build();
 
         user.setAccountId(account.getId());
         user.setEmail(account.getEmail());
@@ -163,9 +169,6 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
 
-        if (!Objects.equals(existingUser.getAccountId(), account.getId()))
-            throw new EntityNotFoundException("User with ID " + userId + " not found");
-
         if (updatedUser.getFullName() != null && !updatedUser.getFullName().isEmpty())
             existingUser.setFullName(updatedUser.getFullName());
         if (updatedUser.getPhone() != null && !updatedUser.getPhone().isEmpty())
@@ -174,8 +177,7 @@ public class UserService {
             existingUser.setIsMale(updatedUser.getIsMale());
         if(updatedUser.getAccountId() != null) {
             ResponseEntity<AccountDto> responseEntity1 = authServiceClient
-                    .getUserById("Bearer " + jwtUtil.getJwtFromContext(),
-                            updatedUser.getAccountId());
+                    .getUserById(updatedUser.getAccountId());
 
             if (!responseEntity1.getStatusCode().is2xxSuccessful()) {
                 throw new EntityNotFoundException("Failed to retrieve account information from auth service");
@@ -196,11 +198,8 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found"));
 
-        ResponseEntity<?> responseEntity = authServiceClient.deleteUserById("Bearer " + jwtUtil.getJwtFromContext(), existingUser.getAccountId());
+        authServiceClient.deleteUserById("Bearer " + jwtUtil.getJwtFromContext(), existingUser.getAccountId());
 
-        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-            throw new EntityNotFoundException("Failed to retrieve account information from auth service");
-        }
 
         if(existingUser.getAvatar() != null && fileUtil.fileExists(existingUser.getAvatar()))
             fileUtil.deleteFile(existingUser.getAvatar());

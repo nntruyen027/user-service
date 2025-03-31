@@ -33,4 +33,18 @@ public class AddressDto {
                 .isDefault(address.getIsDefault())
                 .build();
     }
+
+    public Address toEntity() {
+        return Address
+                .builder()
+                .id(this.getId())
+                .tinh(this.getTinh())
+                .huyen(this.getHuyen())
+                .xa(this.getXa())
+                .chiTiet(this.getChiTiet())
+                .kinhDo(this.getKinhDo())
+                .viDo(this.getViDo())
+                .isDefault(this.getIsDefault())
+                .build();
+    }
 }

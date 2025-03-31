@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import qbit.entier.user_service.dto.CreateUserDto;
 import qbit.entier.user_service.dto.UserAccountDto;
 import qbit.entier.user_service.entity.User;
 import qbit.entier.user_service.service.UserService;
@@ -22,7 +22,6 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("")
-    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Page<UserAccountDto>> getAll(Pageable pageable) {
         return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
@@ -56,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createOne(@RequestBody User user) {
+    public ResponseEntity<?> createOne(@RequestBody CreateUserDto user) {
         try {
             return ResponseEntity.ok(userService.createOne(user));
         } catch (EntityNotFoundException ex) {
